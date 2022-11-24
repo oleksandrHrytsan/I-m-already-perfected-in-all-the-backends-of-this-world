@@ -31,21 +31,28 @@ const postRequest = http.request(options, (res) => {
   });
 });
 
-postRequest.on('error', (err) => {
-  console.log(`Error: ${err.message}`);
-});
+postRequest.on('error', (err) => console.log(`request error: ${err.message}`));
 
-readStream.on('error', (err) => console.log(err.message));
+readStream.pipe(postRequest);
 
-readStream.on('data', (chunk) => {
-  console.log('start reading data!');
-  postRequest.write(chunk);
-});
+// postRequest.on('error', (err) => {
+//   console.log(`Error: ${err.message}`);
+// });
 
-readStream.on('end', () => {
-  console.log('end reading data');
-});
+// readStream.on('error', (err) => console.log(err.message));
 
-readStream.on('close', () => {
-  console.log('request was closed');
-});
+// readStream.once('data', () => {
+//   console.log('start reading data!');
+// });
+
+// readStream.on('data', (chunk) => {
+//   postRequest.write(chunk);
+// });
+
+// readStream.on('end', () => {
+//   console.log('end reading data');
+// });
+
+// readStream.on('close', () => {
+//   console.log('request was closed');
+// });

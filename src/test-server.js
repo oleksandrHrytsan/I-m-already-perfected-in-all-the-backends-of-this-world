@@ -6,39 +6,10 @@ const path = require('path');
 
 const server = http.createServer((req, res) => {
   const readFromPath = path.join(__dirname, 'data', 'hello.csv');
-  const writeToPath = path.join(__dirname, 'data', 'written-by-server.csv');
-
   const readStream = fs.createReadStream(readFromPath);
+
+  const writeToPath = path.join(__dirname, 'data', 'written-by-server.csv');
   const writeStream = fs.createWriteStream(writeToPath, { flags: 'a' });
-
-  const receivedData = [];
-
-  let currentArrIndex = -1;
-
-  function writeRecievedData() {
-    if (receivedData.length === 0) {
-      return;
-    }
-
-    currentArrIndex += 1;
-
-    if (currentArrIndex === receivedData.length) {
-      // console.log(receivedData[currentArrIndex]);
-      currentArrIndex = -1;
-      writeStream.end();
-      return;
-    }
-
-    const nextDataElement = receivedData[currentArrIndex];
-
-    const canContinue = writeStream.write(nextDataElement, (err) => {
-      if (err) console.log(err);
-    });
-
-    if (!canContinue) {
-      writeStream.once('drain', writeRecievedData);
-    } else writeRecievedData();
-  }
 
   if (req.method === 'GET') {
     res.on('error', (err) => {
@@ -64,14 +35,15 @@ const server = http.createServer((req, res) => {
       console.error(`Response error: ${err}`);
     });
 
+    if (fs.existsSync(writeToPath)) {
+      fs.unlinkSync(writeToPath);
+    }
+
     res.writeHead(200);
 
-    req.on('data', (chunk) => {
-      receivedData.push(chunk);
-      writeRecievedData(receivedData);
-    });
+    req.pipe(writeStream);
 
-    writeStream.on('finish', () => {
+    req.on('end', () => {
       console.log('Data has been written');
       res.write('server finished writing data');
       res.end();
