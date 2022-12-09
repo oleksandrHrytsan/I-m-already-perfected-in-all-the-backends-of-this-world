@@ -1,18 +1,29 @@
-const http = require('http');
+const { port } = require('./config');
+const server = require('./server');
 
-const server = http.createServer((req, res) => {
-  if (req.method === 'POST') {
-    let body = '';
-    req.on('data', (chunk) => {
-      body += chunk.toString();
-    });
-    req.on('end', () => {
-      console.log(body);
-      res.end('ok');
-    });
+const boot = async () => {
+  try {
+    server.listen(port);
+  } catch (err) {
+    console.error(`ERROR in boot(): ${err.message || err}`);
   }
-  res.writeHead(200);
-  res.end('Hello, world');
-});
+};
 
-server.listen(3000);
+boot();
+
+// const exitHandler = async (err) => {
+//   if (err) console.error(err);
+
+//   console.log('INFO: Processing shutdown...');
+//   await db.close();
+//   process.exit();
+// };
+
+// process.on('SIGINT', exitHandler);
+// process.on('SIGTERM', exitHandler);
+
+// process.on('SIGUSR1', exitHandler);
+// process.on('SIGUSR2', exitHandler);
+
+// process.on('uncaughtException', exitHandler);
+// process.on('unhandledRejection', exitHandler);
