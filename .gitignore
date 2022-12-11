@@ -1,3 +1,4 @@
 node_modules/
-users.csv
-written-by-server.csv
+data/
+.vscode
+.data
